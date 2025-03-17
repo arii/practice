@@ -50,7 +50,7 @@ class TwoLinkRevoluteManipulator:
         self.l2_limit = LinkLimit(-np.pi, np.pi)
         self._axes = None
 
-    def validate_link_limits(self, q:Configuration) -> bool:
+    def validate_link_limits(self, q: Configuration) -> bool:
         return self.l1_limit.in_range(
             q.q1) and self.l2_limit.in_range(q.q2)
 
@@ -117,35 +117,30 @@ class TwoLinkRevoluteManipulator:
         self.axes().scatter(origin.x, origin.y, color='black')
         if is_valid:
             self.axes().scatter(end_effector.x, end_effector.y, color='grey',
-            s=4)
+                                s=4)
         self.axes().set_title(
             f"Q({q}) -> State({origin}, {midpoint}, {end_effector})")
 
 
-r = TwoLinkRevoluteManipulator(0.35, 0.25)
-plt.ion()
+def plot_solutions_along_x(r: TwoLinkRevoluteManipulator):
+    x = r.l1 + r.l2 * np.random.rand()
+    for y in np.linspace(-r.length(), r.length(), num=30):
+        # r.axes().scatter(x, y)
+        for q in r.inverse_kinematics(State(x, y)):
+            r.plot_configuration(q)
 
-x = r.l1 + r.l2 * np.random.rand()
-for y in np.linspace(-r.length(), r.length(), num=30):
-    # r.axes().scatter(x, y)
-    for q in r.inverse_kinematics(State(x, y)):
-        r.plot_configuration(q)
-input("next")
-"""
-for i in range(10):
-    x = 0.5*r.length()*np.random.randn()
-    y = 0.5*r.length()*np.random.randn()
-    r.axes().scatter(x,y)
-    for q in r.inverse_kinematics(State(x,y)):
-        r.plot_configuration(q)
-    input("next")
+def plot_random_configurations(r: TwoLinkRevoluteManipulator):
+    for q1 in np.arange(0, np.pi*2, step=np.pi/4):
+        for q2 in np.arange(-np.pi, np.pi, step=np.pi/10):
+            q = Configuration(q1, q2)
+            r.plot_configuration(q)
+            # input("next")
 
 
-plt.ion()
-for q1 in np.arange(0, np.pi*2, step=np.pi/4):
-    for q2 in np.arange(-np.pi, np.pi, step=np.pi/10):
-        q = Configuration(q1, q2)
-        ax = r.plot_configuration(q, ax)
-        #input("next")
-input("wait")
-"""
+def main():
+    plt.ion()
+    r = TwoLinkRevoluteManipulator(0.35, 0.25)
+    #plot_random_configurations(r)
+    plot_solutions_along_x(r)
+
+main()
